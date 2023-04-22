@@ -67,6 +67,10 @@ func (a *AWSSecretsManager) GetSecrets(path string, version string, annotations 
 		if err != nil {
 			return nil, err
 		}
+	} else if result.SecretBinary != nil {
+		utils.VerboseToStdErr("Get binary value for %v", path)
+		dat = make(map[string]interface{})
+		dat["secretBinary"] = result.SecretBinary
 	} else {
 		return nil, fmt.Errorf("Could not find secret %s", path)
 	}
@@ -81,6 +85,10 @@ func (a *AWSSecretsManager) GetIndividualSecret(kvpath, secret, version string, 
 	data, err := a.GetSecrets(kvpath, version, annotations)
 	if err != nil {
 		return nil, err
+	}
+	if secret == "binary" {
+		utils.VerboseToStdErr("getting binary secret %s at version %s", kvpath, version)
+		return data["secretBinary"], nil
 	}
 	return data[secret], nil
 }
